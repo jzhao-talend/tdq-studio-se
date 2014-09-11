@@ -80,6 +80,7 @@ import org.talend.dataprofiler.core.ui.events.EventEnum;
 import org.talend.dataprofiler.core.ui.events.EventManager;
 import org.talend.dataprofiler.core.ui.events.EventReceiver;
 import org.talend.dataprofiler.core.ui.events.SoftwareSystemUpdateEventReceiver;
+import org.talend.dataprofiler.core.ui.utils.SqlExplorerUtils;
 import org.talend.dataprofiler.core.ui.utils.WorkbenchUtils;
 import org.talend.dataprofiler.core.ui.views.DQRespositoryView;
 import org.talend.dataquality.indicators.definition.IndicatorCategory;
@@ -670,7 +671,7 @@ public class TOPRepositoryService implements ITDQRepositoryService {
      * .DatabaseConnection)
      */
     public void updateDriverIfClassNotLoad(DatabaseConnection databaseConnection) {
-        CorePlugin.getDefault().updateDriverIfClassNotLoad(databaseConnection);
+        SqlExplorerUtils.getDefault().updateDriverIfClassNotLoad(databaseConnection);
     }
 
     public void publishDynamicEvent(ModelElement indicator, Object value) {

@@ -58,13 +58,13 @@ import org.talend.cwm.relational.TdColumn;
 import org.talend.dataprofiler.common.ui.editor.preview.CustomerDefaultCategoryDataset;
 import org.talend.dataprofiler.common.ui.editor.preview.chart.ChartDecorator;
 import org.talend.dataprofiler.common.ui.editor.preview.chart.TopChartFactory;
-import org.talend.dataprofiler.core.CorePlugin;
 import org.talend.dataprofiler.core.ImageLib;
 import org.talend.dataprofiler.core.PluginConstant;
 import org.talend.dataprofiler.core.i18n.internal.DefaultMessagesImpl;
 import org.talend.dataprofiler.core.ui.editor.preview.model.ChartTableMenuGenerator;
 import org.talend.dataprofiler.core.ui.editor.preview.model.MenuItemEntity;
 import org.talend.dataprofiler.core.ui.pref.EditorPreferencePage;
+import org.talend.dataprofiler.core.ui.utils.SqlExplorerUtils;
 import org.talend.dataquality.analysis.Analysis;
 import org.talend.dataquality.indicators.Indicator;
 import org.talend.dataquality.indicators.columnset.RowMatchingIndicator;
@@ -393,7 +393,7 @@ public class ColumnsComparisonAnalysisResultPage extends AbstractAnalysisResultP
 
                     String query = rowMatchExplorer.getRowsMatchStatement();
                     if (provider != null) {
-                        CorePlugin.getDefault().runInDQViewer(provider, query, columnSet.getName());
+                        SqlExplorerUtils.getDefault().runInDQViewer(provider, query, columnSet.getName());
                     }
                 }
 
@@ -416,7 +416,7 @@ public class ColumnsComparisonAnalysisResultPage extends AbstractAnalysisResultP
 
                 String query = rowMatchExplorer.getRowsNotMatchStatement();
                 if (provider != null) {
-                    CorePlugin.getDefault().runInDQViewer(provider, query, columnSet.getName());
+                    SqlExplorerUtils.getDefault().runInDQViewer(provider, query, columnSet.getName());
                 }
             }
         });
@@ -432,7 +432,7 @@ public class ColumnsComparisonAnalysisResultPage extends AbstractAnalysisResultP
 
                 String query = rowMatchExplorer.getAllRowsStatement();
                 if (provider != null) {
-                    CorePlugin.getDefault().runInDQViewer(provider, query, columnSet.getName());
+                    SqlExplorerUtils.getDefault().runInDQViewer(provider, query, columnSet.getName());
                 }
                 // ~10913
             }
@@ -538,7 +538,7 @@ public class ColumnsComparisonAnalysisResultPage extends AbstractAnalysisResultP
                                                     .getContext().getConnection());
                                             String query = itemEntity.getQuery();
                                             String editorName = indicator.getAnalyzedElement().getName();
-                                            CorePlugin.getDefault().runInDQViewer(tdDataProvider, query, editorName);
+                                            SqlExplorerUtils.getDefault().runInDQViewer(tdDataProvider, query, editorName);
                                         }
 
                                     });

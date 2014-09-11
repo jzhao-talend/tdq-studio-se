@@ -20,16 +20,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import net.sourceforge.sqlexplorer.dbproduct.Alias;
-import net.sourceforge.sqlexplorer.dbproduct.AliasManager;
-import net.sourceforge.sqlexplorer.dbproduct.DriverManager;
-import net.sourceforge.sqlexplorer.dbproduct.ManagedDriver;
-import net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin;
-import net.sourceforge.sqlexplorer.plugin.editors.SQLEditor;
-import net.sourceforge.sqlexplorer.plugin.editors.SQLEditorInput;
-import net.sourceforge.sqlexplorer.sqleditor.actions.ExecSQLAction;
-import net.sourceforge.sqlexplorer.util.AliasAndManaDriverHelper;
-
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -60,14 +50,10 @@ import org.talend.commons.utils.VersionUtils;
 import org.talend.core.GlobalServiceRegister;
 import org.talend.core.context.Context;
 import org.talend.core.context.RepositoryContext;
-import org.talend.core.database.EDatabaseTypeName;
 import org.talend.core.language.ECodeLanguage;
 import org.talend.core.model.general.ILibrariesService;
 import org.talend.core.model.general.Project;
 import org.talend.core.model.metadata.builder.connection.Connection;
-import org.talend.core.model.metadata.builder.connection.DatabaseConnection;
-import org.talend.core.model.metadata.builder.database.JavaSqlFactory;
-import org.talend.core.model.metadata.builder.util.MetadataConnectionUtils;
 import org.talend.core.model.properties.ConnectionItem;
 import org.talend.core.model.properties.Item;
 import org.talend.core.model.properties.Property;
@@ -83,12 +69,10 @@ import org.talend.core.repository.model.RepositoryFactoryProvider;
 import org.talend.core.repository.utils.ProjectHelper;
 import org.talend.core.repository.utils.XmiResourceManager;
 import org.talend.core.runtime.CoreRuntimePlugin;
-import org.talend.cwm.helper.SwitchHelpers;
 import org.talend.dataprofiler.core.i18n.internal.DefaultMessagesImpl;
 import org.talend.dataprofiler.core.ui.editor.AbstractItemEditorInput;
 import org.talend.dataprofiler.core.ui.editor.CommonFormEditor;
 import org.talend.dataprofiler.core.ui.editor.analysis.AnalysisEditor;
-import org.talend.dataprofiler.core.ui.utils.MessageUI;
 import org.talend.dataprofiler.core.ui.utils.WorkbenchUtils;
 import org.talend.dataprofiler.core.ui.views.DQRespositoryView;
 import org.talend.dataprofiler.core.ui.views.PatternTestView;
@@ -197,111 +181,6 @@ public class CorePlugin extends AbstractUIPlugin {
     }
 
     /**
-     * DOC Zqin Comment method "runInDQViewer". this method open DQ responsitory view and run the specified query.
-     * 
-     * @param tdDataProvider
-     * @param query
-     */
-    public void runInDQViewer(Connection tdDataProvider, String query, String editorName) {
-        SQLEditor sqlEditor = openInSqlEditor(tdDataProvider, query, editorName);
-        if (sqlEditor != null) {
-            new ExecSQLAction(sqlEditor).run();
-        }
-    }
-
-    /**
-     * DOC bZhou Comment method "openInSqlEditor".
-     * 
-     * @param tdDataProvider
-     * @param query
-     * @param editorName
-     * @return the specified sql editor.
-     */
-    public SQLEditor openInSqlEditor(Connection tdDataProvider, String query, String editorName) {
-        String lEditorName = editorName;
-        if (lEditorName == null) {
-            lEditorName = String.valueOf(SQLExplorerPlugin.getDefault().getEditorSerialNo());
-        }
-
-        String dbType = PluginConstant.EMPTY_STRING;
-        DatabaseConnection dbConn = SwitchHelpers.DATABASECONNECTION_SWITCH.doSwitch(tdDataProvider);
-        if (dbConn != null) {
-            dbType = dbConn.getDatabaseType();
-        }
-        // MOD qiongli 2013-12-9,TDQ-8442,if the database type is not supported on DQ side,ruturn null.
-        List<String> tdqSupportDBType = MetadataConnectionUtils.getTDQSupportDBTemplate();
-        String username = JavaSqlFactory.getUsername(tdDataProvider);
-        boolean isInvalidUserForMsSql = EDatabaseTypeName.MSSQL.getDisplayName().equalsIgnoreCase(dbType)
-                && (username == null || PluginConstant.EMPTY_STRING.equals(username));
-        if (isInvalidUserForMsSql || !tdqSupportDBType.contains(dbType)) {
-            MessageUI.openWarning(DefaultMessagesImpl.getString("CorePlugin.cantPreview")); //$NON-NLS-1$
-            return null;
-        }
-
-        SQLExplorerPlugin sqlPlugin = SQLExplorerPlugin.getDefault();
-        AliasManager aliasManager = sqlPlugin.getAliasManager();
-
-        Alias alias = aliasManager.getAlias(tdDataProvider.getName());
-
-        if (alias == null) {
-            for (Connection dataProvider : getAllDataProviders()) {
-                // MOD xqliu 2010-10-13 bug 15756
-                // if (dataProvider.getId().equals(tdDataProvider.getId())) {
-                if (dataProvider.getName().equals(tdDataProvider.getName())) {
-                    // ~ 15756
-                    CWMPlugin.getDefault().addConnetionAliasToSQLPlugin(dataProvider);
-                    openInSqlEditor(tdDataProvider, query, lEditorName);
-                }
-            }
-        } else {
-            try {
-                Connection connection = SwitchHelpers.CONNECTION_SWITCH.doSwitch(tdDataProvider);
-                if (connection != null) {
-                    String userName = JavaSqlFactory.getUsername(connection);
-
-                    String url = JavaSqlFactory.getURL(connection);
-                    SQLEditorInput input = new SQLEditorInput("SQL Editor (" + alias.getName() + "." + lEditorName + ").sql"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-                    net.sourceforge.sqlexplorer.dbproduct.User user;
-                    user = alias.getUser(userName);
-                    if (PluginConstant.EMPTY_STRING.equals(userName)) {
-                        // get the user both the dbtype and username are the same.
-                        if (!alias.getUrl().equals(url)) {
-                            String password = JavaSqlFactory.getPassword(connection);
-                            user = new net.sourceforge.sqlexplorer.dbproduct.User(userName, password);
-                            user.setAlias(alias);
-                            alias.addUser(user);
-                        }
-                    } else {
-                        if (user == null) {
-                            user = alias.getDefaultUser();
-                        }
-                    }
-                    alias.setDefaultUser(user);
-
-                    // set IMetadataConnection into the user, if the db type is hive, should use IMetadataConnection to
-                    // create the hive connection
-                    DatabaseConnection databaseConnection = SwitchHelpers.DATABASECONNECTION_SWITCH.doSwitch(connection);
-                    if (databaseConnection != null) {
-                        user.setDatabaseConnection(databaseConnection);
-                        // if ManagedDriver class is not Loaded,check if it lack jars then update the realted jar.
-                        updateDriverIfClassNotLoad(databaseConnection);
-                    }
-
-                    input.setUser(user);
-                    IWorkbenchPage page = SQLExplorerPlugin.getDefault().getActivePage();
-                    SQLEditor editorPart = (SQLEditor) page.openEditor(input, SQLEditor.class.getName());
-                    editorPart.setText(query);
-                    return editorPart;
-                }
-            } catch (PartInitException e) {
-                log.error(e, e);
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * DOC msjian Comment method "getAllDataProviders".
      * 
      * @return
@@ -317,26 +196,6 @@ public class CorePlugin extends AbstractUIPlugin {
             Log.error(e, e);
         }
         return allDataProviders;
-    }
-
-    /**
-     * if the sqlexplorer driver is unRegisted,load the driver jar by lib manage system.
-     * 
-     * @param sqlPlugin
-     * @param connection
-     * @param databaseConnection
-     */
-    public void updateDriverIfClassNotLoad(DatabaseConnection databaseConnection) {
-        SQLExplorerPlugin sqlPlugin = SQLExplorerPlugin.getDefault();
-        DriverManager driverManager = sqlPlugin.getDriverModel();
-        String driverClassName = JavaSqlFactory.getDriverClass(databaseConnection);
-        if (driverClassName != null) {
-            String id = AliasAndManaDriverHelper.getInstance().joinManagedDriverId(databaseConnection);
-            ManagedDriver manDr = driverManager.getDriver(id);
-            if (manDr != null && !manDr.isDriverClassLoaded()) {
-                CWMPlugin.getDefault().loadDriverByLibManageSystem(databaseConnection);
-            }
-        }
     }
 
     /**
@@ -522,25 +381,6 @@ public class CorePlugin extends AbstractUIPlugin {
                             break;
                         }
                     }
-                } else if (editorInput instanceof SQLEditorInput) {// bug 16349.
-                    SQLEditorInput sqlEditorInput = (SQLEditorInput) editorInput;
-                    // MOD qiongli 2010-11-26 bug 17009
-                    if (sqlEditorInput.getUser() == null) {
-                        if (sqlEditorInput.getName().equals(property.getLabel())) {
-                            opening = true;
-                            if (closeEditor) {
-                                activePage.closeEditor(reference.getEditor(false), false);
-                            }
-                            break;
-                        }
-                    } else if (sqlEditorInput.getUser().getAlias().getName().equals(property.getLabel())) {
-                        opening = true;
-                        if (closeEditor) {
-                            activePage.closeEditor(reference.getEditor(false), false);
-                        }
-                        break;
-                    }
-
                 } else if (editorInput instanceof AbstractItemEditorInput) {
                     AbstractItemEditorInput input = (AbstractItemEditorInput) editorInput;
                     Item it = input.getItem();
@@ -716,7 +556,7 @@ public class CorePlugin extends AbstractUIPlugin {
         ReponsitoryContextBridge.initialized(project.getEmfProject(), project.getAuthor());
         // MOD zshen for bug tdq-4757 remove this init from corePlugin.start() to here because the initLocal command of
         // commandLine
-        SQLExplorerPlugin.getDefault().setRootProject(ReponsitoryContextBridge.getRootProject());
+        // SQLExplorerPlugin.getDefault().setRootProject(ReponsitoryContextBridge.getRootProject());
     }
 
     /**

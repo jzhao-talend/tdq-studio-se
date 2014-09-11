@@ -61,9 +61,9 @@ import org.talend.dataprofiler.common.ui.editor.preview.chart.ChartDatasetUtils;
 import org.talend.dataprofiler.common.ui.editor.preview.chart.ChartDatasetUtils.ValueAggregator;
 import org.talend.dataprofiler.common.ui.editor.preview.chart.ChartDecorator;
 import org.talend.dataprofiler.common.ui.editor.preview.chart.TopChartFactory;
-import org.talend.dataprofiler.core.CorePlugin;
 import org.talend.dataprofiler.core.i18n.internal.DefaultMessagesImpl;
 import org.talend.dataprofiler.core.ui.chart.ChartUtils;
+import org.talend.dataprofiler.core.ui.utils.SqlExplorerUtils;
 import org.talend.dataquality.analysis.Analysis;
 import org.talend.dataquality.indicators.columnset.ColumnSetMultiValueIndicator;
 import org.talend.dataquality.indicators.columnset.ColumnsetPackage;
@@ -190,7 +190,7 @@ public class HideSeriesChartComposite extends ChartComposite {
                                                 .getContext().getConnection());
                                         String query = queryString;
                                         String editorName = ColumnHelper.getColumnSetOwner(column).getName();
-                                        CorePlugin.getDefault().runInDQViewer(tdDataProvider, query, editorName);
+                                        SqlExplorerUtils.getDefault().runInDQViewer(tdDataProvider, query, editorName);
                                     }
 
                                 });
@@ -234,7 +234,7 @@ public class HideSeriesChartComposite extends ChartComposite {
                                     .getConnection());
                             String query = sql;
                             String editorName = ColumnHelper.getColumnSetOwner(column).getName();
-                            CorePlugin.getDefault().runInDQViewer(tdDataProvider, query, editorName);
+                            SqlExplorerUtils.getDefault().runInDQViewer(tdDataProvider, query, editorName);
                         }
 
                     });

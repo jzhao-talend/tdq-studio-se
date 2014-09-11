@@ -12,9 +12,11 @@
 // ============================================================================
 package org.talend.dataprofiler.core.service;
 
-import net.sourceforge.sqlexplorer.service.ISaveAsService;
+import net.sourceforge.sqlexplorer.service.ISqlExplorerService;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
+import org.talend.commons.bridge.ReponsitoryContextBridge;
 import org.talend.core.model.properties.Item;
 import org.talend.core.repository.model.ProxyRepositoryFactory;
 import org.talend.dataprofiler.core.CorePlugin;
@@ -25,12 +27,12 @@ import org.talend.resource.EResourceConstant;
 /**
  * DOC qiongli class global comment. Detailled comment
  */
-public class SqlExploerSaveAsService implements ISaveAsService {
+public class SqlExplorerService implements ISqlExplorerService {
 
     /**
      * DOC qiongli SqlExploerSaveAsService constructor comment.
      */
-    public SqlExploerSaveAsService() {
+    public SqlExplorerService() {
     }
 
     /**
@@ -43,6 +45,15 @@ public class SqlExploerSaveAsService implements ISaveAsService {
         CorePlugin.getDefault().refreshDQView(RepositoryNodeHelper.getLibrariesFolderNode(EResourceConstant.SOURCE_FILES));
         return item;
 
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sourceforge.sqlexplorer.service.ISaveAsService#getRootProject()
+     */
+    public IProject getRootProject() {
+        return ReponsitoryContextBridge.getRootProject();
     }
 
 }

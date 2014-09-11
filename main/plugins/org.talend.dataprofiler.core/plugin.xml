@@ -1771,9 +1771,6 @@
               <instanceof
                     value="org.eclipse.ui.part.FileEditorInput">
               </instanceof>
-              <instanceof
-                    value="net.sourceforge.sqlexplorer.plugin.editors.SQLEditorInput">
-              </instanceof>
            </or></editorInputEnablement>
         <selectionEnablement>
            <instanceof
@@ -1790,10 +1787,10 @@
      </preview>
   </extension>
   <extension
-        point="net.sourceforge.sqlexplorer.saveAs">
+        point="net.sourceforge.sqlexplorer.sqlExplorer">
      <Service
-           class="org.talend.dataprofiler.core.service.SqlExploerSaveAsService"
-           saveAsServiceId="net.sourceforge.sqlexplorer.service.ISaveAsService">
+           class="org.talend.dataprofiler.core.service.SqlExplorerService"
+           sqlExplorerServiceId="net.sourceforge.sqlexplorer.service.ISqlExplorerService">
      </Service>
   </extension>
   <extension

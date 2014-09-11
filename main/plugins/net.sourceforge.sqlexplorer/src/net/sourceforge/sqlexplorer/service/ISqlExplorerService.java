@@ -12,14 +12,16 @@
 // ============================================================================
 package net.sourceforge.sqlexplorer.service;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.talend.core.model.properties.Item;
-
 
 /**
  * Add qiongli class global comment. create item and propropty file.
  */
-public interface ISaveAsService extends IService {
+public interface ISqlExplorerService extends IService {
 
     public Item createFile(String content, IPath path, String label, String extension);
+
+    public IProject getRootProject();
 }

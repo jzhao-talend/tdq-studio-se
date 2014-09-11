@@ -77,7 +77,7 @@ public final class PropertyHelper {
 
     /**
      * DOC bZhou Comment method "getPropertyFile".
-     *
+     * 
      * @param elementFile
      * @return null if can't find.
      */
@@ -107,7 +107,7 @@ public final class PropertyHelper {
 
     /**
      * DOC bZhou Comment method "getPropertyFile".
-     *
+     * 
      * @param modelElement
      * @return null if can't find.
      */
@@ -123,7 +123,7 @@ public final class PropertyHelper {
 
     /**
      * DOC klliu Comment method "getPropertyFile".
-     *
+     * 
      * @param elementResource
      * @return null if can't find.
      */
@@ -141,9 +141,10 @@ public final class PropertyHelper {
 
         return null;
     }
-/**
- * getItemFile from the resource of property
- */
+
+    /**
+     * getItemFile from the resource of property
+     */
     public static IFile getModelElementFile(Resource propertyResource) {
         assert propertyResource != null;
         if (propertyResource.getURI().isPlatform()) {
@@ -159,7 +160,7 @@ public final class PropertyHelper {
 
     /**
      * DOC bZhou Comment method "getProperty".
-     *
+     * 
      * @param file
      * @return Null if can't find.
      */
@@ -190,7 +191,7 @@ public final class PropertyHelper {
 
     /**
      * DOC bZhou Comment method "getProperty".
-     *
+     * 
      * @param propertyFile
      * @return
      */
@@ -201,9 +202,9 @@ public final class PropertyHelper {
     }
 
     /**
-     *
+     * 
      * Get property by property file resource.
-     *
+     * 
      * @param propertyFile
      * @param useRelativePath,if true,get EMF resource by relative path for URI.
      * @return
@@ -242,7 +243,7 @@ public final class PropertyHelper {
 
     /**
      * DOC bZhou Comment method "getProperty".
-     *
+     * 
      * @param element
      * @return property or null
      */
@@ -263,7 +264,7 @@ public final class PropertyHelper {
 
     /**
      * DOC bZhou Comment method "createFolderItemProperty".
-     *
+     * 
      * @return
      */
     public static Property createFolderItemProperty() {
@@ -283,14 +284,14 @@ public final class PropertyHelper {
     }
 
     /**
-     *
+     * 
      * DOC bZhou Comment method "createFolderItemProperty".
-     *
+     * 
      * This mothod is to create a tdq item for TOP, this item is used to some element which is not have spacified item
      * definition.
-     *
+     * 
      * like *.sql files.
-     *
+     * 
      * @return
      */
     public static Property createTDQItemProperty() {
@@ -311,11 +312,11 @@ public final class PropertyHelper {
 
     /**
      * DOC bZhou Comment method "getItemTypedPath".
-     *
+     * 
      * This method is to get the typed path for a specified item. Each typed item has a firm static path.
-     *
+     * 
      * e.g. Project/TypedPath/StatePath/xxxx.property
-     *
+     * 
      * @param item
      * @return
      */
@@ -325,7 +326,7 @@ public final class PropertyHelper {
 
     /**
      * DOC bZhou Comment method "getItemTypedPath".
-     *
+     * 
      * @param item
      * @return
      */
@@ -338,11 +339,11 @@ public final class PropertyHelper {
 
     /**
      * DOC bZhou Comment method "getItemStatePath".
-     *
+     * 
      * This method is to get the relative path to the typed path of a item.
-     *
+     * 
      * e.g. Project/TypedPath/StatePath/xxxx.property
-     *
+     * 
      * @param property
      * @return
      */
@@ -367,11 +368,11 @@ public final class PropertyHelper {
 
     /**
      * DOC bZhou Comment method "getItemPath".
-     *
+     * 
      * This method is to get the entire path of a item.
-     *
+     * 
      * e.g. getItemPath() = Project/TypedPath/StatePath/xxxx.property.
-     *
+     * 
      * @param property
      * @return
      */
@@ -413,7 +414,7 @@ public final class PropertyHelper {
 
     /**
      * DOC bZhou Comment method "getItemFile".
-     *
+     * 
      * @param property
      * @return
      */
@@ -424,9 +425,9 @@ public final class PropertyHelper {
 
     /**
      * DOC bZhou Comment method "extractProjectLabel".
-     *
+     * 
      * This method is to extract the project technical label.
-     *
+     * 
      * @param property
      * @return
      */
@@ -453,7 +454,7 @@ public final class PropertyHelper {
 
     /**
      * DOC bZhou Comment method "computePath".
-     *
+     * 
      * @param property
      * @return
      */
@@ -481,7 +482,7 @@ public final class PropertyHelper {
 
     /**
      * DOC bZhou Comment method "computePath".
-     *
+     * 
      * @param property
      * @param file
      * @return
@@ -526,16 +527,19 @@ public final class PropertyHelper {
 
     /**
      * DOC bZhou Comment method "getModelElement".
-     *
+     * 
      * Get model element from property recognized by current system.
-     *
+     * 
      * @param property
      * @return
      */
     public static ModelElement getModelElement(Property property) {
         Item item = property.getItem();
 
-        assert item != null;
+        // assert item != null;
+        if (item == null) {
+            return null;
+        }
 
         ModelElement element = (ModelElement) new org.talend.core.model.properties.util.PropertiesSwitch() {
 
@@ -603,9 +607,9 @@ public final class PropertyHelper {
     }
 
     /**
-     *
+     * 
      * check if exist duplicate name.
-     *
+     * 
      * @param newName
      * @param oldName,it is just used to moidify Item,if it is null/empety,indicate that it is a new Item.
      * @param objectType
@@ -631,7 +635,7 @@ public final class PropertyHelper {
 
     /**
      * return the duplicate object property.
-     *
+     * 
      * @param newName
      * @param objectType
      */
@@ -660,7 +664,7 @@ public final class PropertyHelper {
     }
 
     /**
-     *
+     * 
      * @param property
      * @return get path of modelElement from property
      */
@@ -682,12 +686,12 @@ public final class PropertyHelper {
     }
 
     /**
-     *
+     * 
      * Comment method "changeName".
-     *
+     * 
      * @param property which one need to be changed.
      * @param newName the new value of name
-     *
+     * 
      * waitting a day to remove the name attribute from ModelElement. it let ue have to use service to do this simple
      * thing. If we need to do it on the TOS
      */

@@ -77,6 +77,7 @@ import org.talend.dataprofiler.core.ui.editor.preview.TableIndicatorUnit;
 import org.talend.dataprofiler.core.ui.utils.AnalysisUtils;
 import org.talend.dataprofiler.core.ui.utils.MessageUI;
 import org.talend.dataprofiler.core.ui.utils.OpeningHelpWizardDialog;
+import org.talend.dataprofiler.core.ui.utils.SqlExplorerUtils;
 import org.talend.dataprofiler.core.ui.views.DQRespositoryView;
 import org.talend.dataprofiler.core.ui.views.TableViewerDND;
 import org.talend.dataprofiler.core.ui.wizard.analysis.table.DQRuleLabelProvider;
@@ -1266,7 +1267,7 @@ public class AnalysisTableTreeViewer extends AbstractTableDropTree {
                         return;
                     }
 
-                    CorePlugin.getDefault().openInSqlEditor(dataprovider, expression.getBody(), set.getName());
+                    SqlExplorerUtils.getDefault().openInSqlEditor(dataprovider, expression.getBody(), set.getName());
                 }
             }
         }

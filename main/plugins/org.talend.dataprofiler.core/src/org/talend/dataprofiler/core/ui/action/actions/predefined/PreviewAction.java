@@ -15,9 +15,9 @@ package org.talend.dataprofiler.core.ui.action.actions.predefined;
 import org.eclipse.jface.action.Action;
 import org.talend.core.model.metadata.builder.connection.Connection;
 import org.talend.cwm.helper.ConnectionHelper;
-import org.talend.dataprofiler.core.CorePlugin;
 import org.talend.dataprofiler.core.ImageLib;
 import org.talend.dataprofiler.core.i18n.internal.DefaultMessagesImpl;
+import org.talend.dataprofiler.core.ui.utils.SqlExplorerUtils;
 import org.talend.dq.helper.ColumnSetNameHelper;
 import orgomg.cwm.resource.relational.NamedColumnSet;
 
@@ -52,6 +52,6 @@ public class PreviewAction extends Action {
         Connection tdDataProvider = ConnectionHelper.getDataProvider(set);
         String qualifiedName = ColumnSetNameHelper.getColumnSetQualifiedName(tdDataProvider, set);
         String query = "select * from " + qualifiedName; //$NON-NLS-1$
-        CorePlugin.getDefault().runInDQViewer(tdDataProvider, query, qualifiedName);
+        SqlExplorerUtils.getDefault().runInDQViewer(tdDataProvider, query, qualifiedName);
     }
 }

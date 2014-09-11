@@ -19,8 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin;
-
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -86,11 +84,8 @@ import org.eclipse.ui.progress.UIJob;
 import org.talend.commons.exception.PersistenceException;
 import org.talend.commons.ui.swt.dialogs.ProgressDialog;
 import org.talend.core.model.general.Project;
-import org.talend.core.model.metadata.builder.database.JavaSqlFactory;
 import org.talend.core.model.metadata.builder.database.PluginConstant;
-import org.talend.core.model.properties.DatabaseConnectionItem;
 import org.talend.core.model.properties.FolderItem;
-import org.talend.core.model.properties.Item;
 import org.talend.core.model.repository.ERepositoryObjectType;
 import org.talend.core.model.repository.IRepositoryViewObject;
 import org.talend.core.repository.model.ProxyRepositoryFactory;
@@ -119,7 +114,6 @@ import org.talend.dataprofiler.core.ui.utils.WorkbenchUtils;
 import org.talend.dataprofiler.core.ui.views.layout.BorderLayout;
 import org.talend.dataprofiler.migration.manager.MigrationTaskManager;
 import org.talend.dataquality.indicators.definition.IndicatorDefinition;
-import org.talend.dq.CWMPlugin;
 import org.talend.dq.helper.ProxyRepositoryManager;
 import org.talend.dq.helper.RepositoryNodeHelper;
 import org.talend.dq.indicators.definitions.DefinitionHandler;
@@ -231,27 +225,28 @@ public class DQRespositoryView extends CommonNavigator {
         ResourceService.initResourcePersistence();
 
         // initialized drivers in sql explorer.
-        SQLExplorerPlugin.getDefault().initAllDrivers();
-        try {
-            if (!SQLExplorerPlugin.getDefault().isInitedAllConnToSQLExpl()) {
-                for (IRepositoryViewObject viewObject : ProxyRepositoryFactory.getInstance().getAll(
-                        ERepositoryObjectType.METADATA_CONNECTIONS, true)) {
-                    if (viewObject == null || viewObject.getProperty() == null) {
-                        continue;
-                    }
-                    Item item = viewObject.getProperty().getItem();
-                    if (item != null && (item instanceof DatabaseConnectionItem)) {
-                        String username = JavaSqlFactory.getUsername(((DatabaseConnectionItem) item).getConnection());
-                        if (username != null && !"".equals(username.trim())) { //$NON-NLS-1$
-                            CWMPlugin.getDefault().addConnetionAliasToSQLPlugin(((DatabaseConnectionItem) item).getConnection());
-                        }
-                    }
-                }
-                SQLExplorerPlugin.getDefault().setInitedAllConnToSQLExpl(true);
-            }
-        } catch (PersistenceException e) {
-            log.error(e, e);
-        }
+        // will init the drivers when active the sqlexplorer plugin
+        // SQLExplorerPlugin.getDefault().initAllDrivers();
+        // try {
+        // if (!SQLExplorerPlugin.getDefault().isInitedAllConnToSQLExpl()) {
+        // for (IRepositoryViewObject viewObject : ProxyRepositoryFactory.getInstance().getAll(
+        // ERepositoryObjectType.METADATA_CONNECTIONS, true)) {
+        // if (viewObject == null || viewObject.getProperty() == null) {
+        // continue;
+        // }
+        // Item item = viewObject.getProperty().getItem();
+        // if (item != null && (item instanceof DatabaseConnectionItem)) {
+        // String username = JavaSqlFactory.getUsername(((DatabaseConnectionItem) item).getConnection());
+        //                        if (username != null && !"".equals(username.trim())) { //$NON-NLS-1$
+        // CWMPlugin.getDefault().addConnetionAliasToSQLPlugin(((DatabaseConnectionItem) item).getConnection());
+        // }
+        // }
+        // }
+        // SQLExplorerPlugin.getDefault().setInitedAllConnToSQLExpl(true);
+        // }
+        // } catch (PersistenceException e) {
+        // log.error(e, e);
+        // }
 
         // MOD qiongli 2011-3-2 feature 17588.initilize all folder.
         initAllFolders();

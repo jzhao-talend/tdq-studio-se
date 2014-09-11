@@ -29,6 +29,7 @@ import net.sourceforge.sqlexplorer.history.SQLHistory;
 import net.sourceforge.sqlexplorer.plugin.editors.SQLEditor;
 import net.sourceforge.sqlexplorer.plugin.editors.SQLEditorInput;
 import net.sourceforge.sqlexplorer.plugin.views.DatabaseStructureView;
+import net.sourceforge.sqlexplorer.service.ISqlExplorerService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -139,12 +140,32 @@ public class SQLExplorerPlugin extends AbstractUIPlugin {
             error("Exception during start", e);
             throw e;
         }
+
+        initRootProject();
+        initAllDrivers();
+    }
+
+    /**
+     * DOC xqliu Comment method "initRootProject".
+     */
+    private void initRootProject() {
+        if (getRootProject() == null) {
+            ISqlExplorerService sqlExplorerService = null;
+            if (net.sourceforge.sqlexplorer.service.GlobalServiceRegister.getDefault().isServiceRegistered(
+                    ISqlExplorerService.class)) {
+                sqlExplorerService = (ISqlExplorerService) net.sourceforge.sqlexplorer.service.GlobalServiceRegister.getDefault()
+                        .getService(ISqlExplorerService.class);
+                if (sqlExplorerService != null) {
+                    setRootProject(sqlExplorerService.getRootProject());
+                }
+            }
+        }
     }
 
     /**
      * DOC bZhou Comment method "initAllDrivers".
      */
-    public void initAllDrivers() {
+    private void initAllDrivers() {
         ITDQRepositoryService tdqRepService = null;
         if (GlobalServiceRegister.getDefault().isServiceRegistered(ITDQRepositoryService.class)) {
             tdqRepService = (ITDQRepositoryService) GlobalServiceRegister.getDefault().getService(ITDQRepositoryService.class);

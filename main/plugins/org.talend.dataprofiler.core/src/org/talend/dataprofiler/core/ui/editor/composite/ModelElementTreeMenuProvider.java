@@ -50,6 +50,7 @@ import org.talend.dataprofiler.core.ui.editor.pattern.PatternEditor;
 import org.talend.dataprofiler.core.ui.editor.pattern.PatternItemEditorInput;
 import org.talend.dataprofiler.core.ui.editor.preview.ColumnIndicatorUnit;
 import org.talend.dataprofiler.core.ui.editor.preview.IndicatorUnit;
+import org.talend.dataprofiler.core.ui.utils.SqlExplorerUtils;
 import org.talend.dataprofiler.core.ui.views.DQRespositoryView;
 import org.talend.dataquality.domain.pattern.Pattern;
 import org.talend.dataquality.indicators.FrequencyIndicator;
@@ -374,7 +375,7 @@ public abstract class ModelElementTreeMenuProvider {
                 return;
             }
 
-            CorePlugin.getDefault().openInSqlEditor(dataprovider, expression.getBody(),
+            SqlExplorerUtils.getDefault().openInSqlEditor(dataprovider, expression.getBody(),
                     meIndicator.getModelElementRepositoryNode().getObject().getProperty().getLabel());
         }
     }

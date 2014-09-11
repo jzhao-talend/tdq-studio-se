@@ -17,13 +17,10 @@ import java.util.Map;
 
 import net.sourceforge.sqlexplorer.Messages;
 
-import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
-
-
 
 /**
  * DOC qiongli class global comment. A global service register provides the service registration and acquirement.
@@ -32,14 +29,12 @@ public class GlobalServiceRegister {
 
     private static GlobalServiceRegister instance = new GlobalServiceRegister();;
 
-
     private Map<Class, IService> services = new HashMap<Class, IService>();
-    private static Logger log = Logger.getLogger(GlobalServiceRegister.class);
 
     private static IExtensionRegistry registry = Platform.getExtensionRegistry();
 
     private static IConfigurationElement[] configurationElements = registry == null ? null : registry
-            .getConfigurationElementsFor("net.sourceforge.sqlexplorer.saveAs"); //$NON-NLS-1$
+            .getConfigurationElementsFor("net.sourceforge.sqlexplorer.sqlExplorer"); //$NON-NLS-1$
 
     public static GlobalServiceRegister getDefault() {
         return instance;
@@ -55,9 +50,8 @@ public class GlobalServiceRegister {
         IService service = services.get(klass);
         if (service == null && configurationElements != null) {
             service = findService(klass);
-            if (service == null){
-                throw new RuntimeException(Messages.getString("GlobalServiceRegister.ServiceNotRegistered", klass.getName())); //$NON-NLS-1$ //$NON-NLS-2$
-                //                throw new RuntimeException("The service has not been registered."); //$NON-NLS-1$ //$NON-NLS-2$
+            if (service == null) {
+                throw new RuntimeException(Messages.getString("GlobalServiceRegister.ServiceNotRegistered", klass.getName())); //$NON-NLS-1$ 
             }
             services.put(klass, service);
         }
@@ -84,9 +78,8 @@ public class GlobalServiceRegister {
      */
     private IService findService(Class klass) {
         String key = klass.getName();
-        for (int i = 0; i < configurationElements.length; i++) {
-            IConfigurationElement element = configurationElements[i];
-            String id = element.getAttribute("saveAsServiceId"); //$NON-NLS-1$
+        for (IConfigurationElement element : configurationElements) {
+            String id = element.getAttribute("sqlExplorerServiceId"); //$NON-NLS-1$
 
             if (!key.endsWith(id)) {
                 continue;
@@ -97,12 +90,10 @@ public class GlobalServiceRegister {
                     return (IService) service;
                 }
             } catch (CoreException e) {
-                // ExceptionHandler.process(e);
                 e.printStackTrace();
             }
         }
         return null;
     }
-
 
 }

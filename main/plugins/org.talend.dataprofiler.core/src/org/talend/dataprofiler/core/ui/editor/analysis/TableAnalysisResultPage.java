@@ -53,7 +53,6 @@ import org.jfree.experimental.chart.swt.ChartComposite;
 import org.talend.core.model.metadata.builder.connection.Connection;
 import org.talend.cwm.helper.SwitchHelpers;
 import org.talend.dataprofiler.common.ui.editor.preview.ICustomerDataset;
-import org.talend.dataprofiler.core.CorePlugin;
 import org.talend.dataprofiler.core.PluginConstant;
 import org.talend.dataprofiler.core.i18n.internal.DefaultMessagesImpl;
 import org.talend.dataprofiler.core.model.TableIndicator;
@@ -77,6 +76,7 @@ import org.talend.dataprofiler.core.ui.events.IEventReceiver;
 import org.talend.dataprofiler.core.ui.events.TableDynamicChartEventReceiver;
 import org.talend.dataprofiler.core.ui.pref.EditorPreferencePage;
 import org.talend.dataprofiler.core.ui.utils.AnalysisUtils;
+import org.talend.dataprofiler.core.ui.utils.SqlExplorerUtils;
 import org.talend.dataquality.analysis.Analysis;
 import org.talend.dataquality.indicators.Indicator;
 import org.talend.dq.analysis.AnalysisHandler;
@@ -477,7 +477,7 @@ public class TableAnalysisResultPage extends AbstractAnalysisResultPage implemen
                                                     .getContext().getConnection());
                                             String query = itemEntity.getQuery();
                                             String editorName = currentIndicator.getName();
-                                            CorePlugin.getDefault().runInDQViewer(tdDataProvider, query, editorName);
+                                            SqlExplorerUtils.getDefault().runInDQViewer(tdDataProvider, query, editorName);
                                         }
 
                                     });

@@ -69,6 +69,7 @@ import org.talend.dataprofiler.core.ui.events.EventEnum;
 import org.talend.dataprofiler.core.ui.events.EventManager;
 import org.talend.dataprofiler.core.ui.events.IEventReceiver;
 import org.talend.dataprofiler.core.ui.pref.EditorPreferencePage;
+import org.talend.dataprofiler.core.ui.utils.SqlExplorerUtils;
 import org.talend.dataprofiler.core.ui.utils.pagination.UIPagination;
 import org.talend.dataquality.analysis.Analysis;
 import org.talend.dataquality.analysis.ExecutionLanguage;
@@ -407,7 +408,7 @@ public class ResultPaginationInfo extends IndicatorPaginationInfo {
                                                         .getContext().getConnection());
                                                 String query = itemEntity.getQuery();
                                                 String editorName = currentIndicator.getName();
-                                                CorePlugin.getDefault().runInDQViewer(tdDataProvider, query, editorName);
+                                                SqlExplorerUtils.getDefault().runInDQViewer(tdDataProvider, query, editorName);
                                             }
 
                                         });

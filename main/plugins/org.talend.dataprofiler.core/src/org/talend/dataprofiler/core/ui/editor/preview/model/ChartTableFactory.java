@@ -54,6 +54,7 @@ import org.talend.dataprofiler.core.service.IJobService;
 import org.talend.dataprofiler.core.ui.action.actions.CreateDuplicatesAnalysisAction;
 import org.talend.dataprofiler.core.ui.dialog.ColumnsMapSelectionDialog;
 import org.talend.dataprofiler.core.ui.editor.analysis.drilldown.DrillDownEditorInput;
+import org.talend.dataprofiler.core.ui.utils.SqlExplorerUtils;
 import org.talend.dataprofiler.core.ui.utils.TableUtils;
 import org.talend.dataquality.analysis.Analysis;
 import org.talend.dataquality.analysis.AnalysisType;
@@ -217,7 +218,7 @@ public final class ChartTableFactory {
                                                     DefaultMessagesImpl.getString("ChartTableFactory.NoSupportPatternTeradata"));//$NON-NLS-1$
                                             return;
                                         }
-                                        CorePlugin.getDefault().runInDQViewer(tdDataProvider, query, editorName);
+                                        SqlExplorerUtils.getDefault().runInDQViewer(tdDataProvider, query, editorName);
                                     }
                                 });
 

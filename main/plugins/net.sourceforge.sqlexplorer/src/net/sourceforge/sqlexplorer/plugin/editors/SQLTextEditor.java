@@ -18,7 +18,7 @@ import net.sourceforge.sqlexplorer.IConstants;
 import net.sourceforge.sqlexplorer.dbproduct.Session;
 import net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin;
 import net.sourceforge.sqlexplorer.service.GlobalServiceRegister;
-import net.sourceforge.sqlexplorer.service.ISaveAsService;
+import net.sourceforge.sqlexplorer.service.ISqlExplorerService;
 import net.sourceforge.sqlexplorer.sessiontree.model.utility.Dictionary;
 import net.sourceforge.sqlexplorer.sqleditor.SQLTextViewer;
 import net.sourceforge.sqlexplorer.sqleditor.actions.ExecSQLAction;
@@ -226,8 +226,8 @@ public class SQLTextEditor extends TextEditor {
      */
     private IFile createIFile(IFile file, String content) throws CoreException {
         // MOD qiongli 2011-4-21.bug 20205 .should create sql file and property.use extension of service mechanism.
-        if (GlobalServiceRegister.getDefault().isServiceRegistered(ISaveAsService.class)) {
-            ISaveAsService service = (ISaveAsService) GlobalServiceRegister.getDefault().getService(ISaveAsService.class);
+        if (GlobalServiceRegister.getDefault().isServiceRegistered(ISqlExplorerService.class)) {
+            ISqlExplorerService service = (ISqlExplorerService) GlobalServiceRegister.getDefault().getService(ISqlExplorerService.class);
             String fName = StringUtils.removeEnd(StringUtils.removeEnd(file.getName(), DEFAULT_FILE_EXTENSION),
                     DEFAULT_VERSION_STRING);
             IWorkspace workspace = ResourcesPlugin.getWorkspace();
