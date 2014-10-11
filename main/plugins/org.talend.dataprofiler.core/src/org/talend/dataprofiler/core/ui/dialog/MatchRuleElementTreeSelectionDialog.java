@@ -64,6 +64,7 @@ import org.talend.dataquality.record.linkage.constant.RecordMatcherType;
 import org.talend.dataquality.record.linkage.utils.HandleNullEnum;
 import org.talend.dataquality.rules.AlgorithmDefinition;
 import org.talend.dataquality.rules.BlockKeyDefinition;
+import org.talend.dataquality.rules.KeyDefinition;
 import org.talend.dataquality.rules.MatchKeyDefinition;
 import org.talend.dataquality.rules.MatchRule;
 import org.talend.dataquality.rules.MatchRuleDefinition;
@@ -83,7 +84,7 @@ public class MatchRuleElementTreeSelectionDialog extends ElementTreeSelectionDia
 
     private List<String> inputColumnNames;
 
-    private List<String> survivorshipKeys;
+    private List<String> currentAnaMatchKeys;
 
     private List<String> lookupColumnNames;
 
@@ -139,7 +140,7 @@ public class MatchRuleElementTreeSelectionDialog extends ElementTreeSelectionDia
     }
 
     /**
-     * DOC yyin Comment method "addValidator".
+     * validate the selected rule .
      */
     private void addValidator() {
         setValidator(new ISelectionStatusValidator() {
@@ -157,30 +158,19 @@ public class MatchRuleElementTreeSelectionDialog extends ElementTreeSelectionDia
                             IFile file = (IFile) selectObject;
                             if (FactoriesUtil.DQRULE.equals(file.getFileExtension())) {
                                 MatchRuleDefinition matchRuleDef = DQRuleResourceFileHelper.getInstance().findMatchRule(file);
-                                if ((matchRuleDef.getBlockKeys() == null || matchRuleDef.getBlockKeys().size() < 1)
-                                        && (matchRuleDef.getMatchRules() == null || matchRuleDef.getMatchRules().size() < 1)) {
+                                if (isEmptyRule(matchRuleDef)) {
                                     status = new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID,
                                             DefaultMessagesImpl.getString("MatchRuleCheckedTreeSelectionDialog.emptyRule")); //$NON-NLS-1$
                                     return status;
                                 }
 
                                 // check if exist duplicated Match Keys
-                                if (!isOverwrite) {
-                                    Set<String> duplicatedSurvivorshipKeys = new HashSet<String>();
-                                    for (SurvivorshipKeyDefinition skDef : matchRuleDef.getSurvivorshipKeys()) {
-                                        if (skDef != null && getSurvivorshipKeys().contains(skDef.getName())) {
-                                            duplicatedSurvivorshipKeys.add(skDef.getName());
-                                        }
-                                    }
-                                    if (!duplicatedSurvivorshipKeys.isEmpty()) {
-                                        status = new Status(
-                                                IStatus.ERROR,
-                                                CorePlugin.PLUGIN_ID,
-                                                DefaultMessagesImpl
-                                                        .getString(
-                                                                "MatchRuleCheckedTreeSelectionDialog.duplicatedMatchKey", duplicatedSurvivorshipKeys.toString())); //$NON-NLS-1$
-                                        return status;
-                                    }
+                                Set<String> duplicatedKeys = hasDuplicatedKeys(matchRuleDef);
+                                if (!duplicatedKeys.isEmpty()) {
+                                    status = new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, DefaultMessagesImpl.getString(
+                                            "MatchRuleCheckedTreeSelectionDialog.duplicatedMatchKey", //$NON-NLS-1$
+                                            duplicatedKeys.toString()));
+                                    return status;
                                 }
 
                                 // for component tMatchGroup and tRecordMatching when the imported rule's algorithm is
@@ -195,51 +185,9 @@ public class MatchRuleElementTreeSelectionDialog extends ElementTreeSelectionDia
                                 }
                                 // ~~~~~~~~~~
 
-                                String warningMsg = StringUtils.EMPTY;
-
-                                boolean needColumnWarning = false;
-                                if (dialogType != MATCHGROUP_TYPE && dialogType != RECORD_MATCHING_TYPE) {
-                                    for (BlockKeyDefinition bkd : matchRuleDef.getBlockKeys()) {
-                                        boolean hasColumnMatch = false;
-                                        for (String col : inputColumnNames) {
-                                            if (col.equalsIgnoreCase(bkd.getColumn()) || col.equalsIgnoreCase(bkd.getName())) {
-                                                hasColumnMatch = true;
-                                                break;
-                                            }
-                                        }
-                                        if (!hasColumnMatch) {
-                                            needColumnWarning = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (dialogType != GENKEY_TYPE) {
-                                    for (MatchRule rule : matchRuleDef.getMatchRules()) {
-                                        EList<MatchKeyDefinition> matchKeys = rule.getMatchKeys();
-                                        for (MatchKeyDefinition mkd : matchKeys) {
-                                            boolean hasColumnMatch = false;
-                                            for (String col : inputColumnNames) {
-                                                if (col.equalsIgnoreCase(mkd.getColumn()) || col.equalsIgnoreCase(mkd.getName())) {
-                                                    hasColumnMatch = true;
-                                                    break;
-                                                }
-                                            }
-                                            if (!hasColumnMatch) {
-                                                needColumnWarning = true;
-                                                break;
-                                            }
-                                        }
-                                        if (needColumnWarning) {
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (needColumnWarning) {
-                                    warningMsg = DefaultMessagesImpl
+                                if (isNeedColumnWarning(matchRuleDef)) {
+                                    String warningMsg = DefaultMessagesImpl
                                             .getString("MatchRuleCheckedTreeSelectionDialog.noColumnMatchWarning"); //$NON-NLS-1$
-                                }
-
-                                if (!StringUtils.EMPTY.equals(warningMsg)) {
                                     status = new Status(IStatus.WARNING, CorePlugin.PLUGIN_ID, warningMsg);
                                 }
                             }
@@ -248,6 +196,101 @@ public class MatchRuleElementTreeSelectionDialog extends ElementTreeSelectionDia
                 }
 
                 return status;
+            }
+
+            /**
+             * check every block keys and match keys, if any key .
+             * 
+             * @param matchRuleDef
+             * @return
+             */
+            private boolean isNeedColumnWarning(MatchRuleDefinition matchRuleDef) {
+                boolean needColumnWarning = false;
+                if (dialogType != MATCHGROUP_TYPE && dialogType != RECORD_MATCHING_TYPE) {
+                    for (BlockKeyDefinition bkd : matchRuleDef.getBlockKeys()) {
+                        if (hasColumnMatchTheKey(bkd)) {
+                            needColumnWarning = true;
+                            break;
+                        }
+                    }
+                }
+                if (dialogType != GENKEY_TYPE) {
+                    for (MatchRule rule : matchRuleDef.getMatchRules()) {
+                        EList<MatchKeyDefinition> matchKeys = rule.getMatchKeys();
+                        for (MatchKeyDefinition mkd : matchKeys) {
+                            if (!hasColumnMatchTheKey(mkd)) {
+                                needColumnWarning = true;
+                                break;
+                            }
+                        }
+                        if (needColumnWarning) {
+                            break;
+                        }
+                    }
+                }
+                return needColumnWarning;
+            }
+
+            /**
+             * check if the key's name equals the .
+             * 
+             * @param needColumnWarning
+             * @param bkd
+             * @return
+             */
+            private boolean hasColumnMatchTheKey(KeyDefinition bkd) {
+                for (String column : inputColumnNames) {
+                    if (isColumnNameEqualsWithKey(bkd, column)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            /**
+             * check if the match key or survivor key has .if the user has choose "overwrite",no need to judge then.
+             * Judged according to the selected rule type(vsr or tswoosh)
+             * 
+             * @param matchRuleDef
+             * @return
+             */
+            private Set<String> hasDuplicatedKeys(MatchRuleDefinition matchRuleDef) {
+                Set<String> duplicatedKeys = new HashSet<String>();
+                if (isOverwrite || currentAnaMatchKeys == null) {
+                    return duplicatedKeys;
+                }
+                for (MatchRule rule : matchRuleDef.getMatchRules()) {
+                    EList<MatchKeyDefinition> matchKeys = rule.getMatchKeys();
+                    for (MatchKeyDefinition mkd : matchKeys) {
+                        isContainSameKey(currentAnaMatchKeys, duplicatedKeys, mkd);
+                    }
+                }
+                return duplicatedKeys;
+            }
+
+            /**
+             * DOC yyin Comment method "isContainSameKey".
+             * 
+             * @param currentAnaKeys
+             * 
+             * @param duplicatedKeys
+             * @param skDef
+             */
+            private void isContainSameKey(List<String> currentAnaKeys, Set<String> duplicatedKeys, KeyDefinition skDef) {
+                if (skDef != null && currentAnaKeys.contains(skDef.getName())) {
+                    duplicatedKeys.add(skDef.getName());
+                }
+            }
+
+            /**
+             * DOC yyin Comment method "isEmptyRule".
+             * 
+             * @param matchRuleDef
+             * @return
+             */
+            private boolean isEmptyRule(MatchRuleDefinition matchRuleDef) {
+                return (matchRuleDef.getBlockKeys() == null || matchRuleDef.getBlockKeys().size() < 1)
+                        && (matchRuleDef.getMatchRules() == null || matchRuleDef.getMatchRules().size() < 1);
             }
 
         });
@@ -500,18 +543,6 @@ public class MatchRuleElementTreeSelectionDialog extends ElementTreeSelectionDia
         return ruleValues;
     }
 
-    private String matchExistingColumnForBlockingKey(BlockKeyDefinition blockingKey) {
-        String matchedColumnName = StringUtils.EMPTY;
-        for (String inputColumnName : getInputColumnNames()) {
-            if (inputColumnName.equalsIgnoreCase(blockingKey.getColumn())
-                    || inputColumnName.equalsIgnoreCase(blockingKey.getName())) {
-                matchedColumnName = inputColumnName;
-                break;
-            }
-        }
-        return matchedColumnName;
-    }
-
     public List<Map<String, String>> getMatchRulesFromFiles(Object[] files) {
         return getMatchRulesFromFiles(files, false);
     }
@@ -535,10 +566,21 @@ public class MatchRuleElementTreeSelectionDialog extends ElementTreeSelectionDia
         return ruleValues;
     }
 
-    private String matchExistingColumnForMatchRule(MatchKeyDefinition matchKey) {
+    /**
+     * check if the column name equals with the key's name(or key's column name)--Case Sensitive
+     * 
+     * @param matchKey
+     * @param lookupColumnName
+     * @return
+     */
+    private boolean isColumnNameEqualsWithKey(KeyDefinition key, String columnName) {
+        return columnName.equals(key.getColumn()) || columnName.equals(key.getName());
+    }
+
+    private String matchExistingColumnForKey(KeyDefinition key) {
         String matchedColumnName = StringUtils.EMPTY;
         for (String inputColumnName : getInputColumnNames()) {
-            if (inputColumnName.equalsIgnoreCase(matchKey.getColumn()) || inputColumnName.equalsIgnoreCase(matchKey.getName())) {
+            if (isColumnNameEqualsWithKey(key, inputColumnName)) {
                 matchedColumnName = inputColumnName;
                 break;
             }
@@ -557,7 +599,7 @@ public class MatchRuleElementTreeSelectionDialog extends ElementTreeSelectionDia
                 pr.put(BlockingKeysTableLabelProvider.BLOCKING_KEY_NAME, null == bkDefinition.getName() ? StringUtils.EMPTY
                         : bkDefinition.getName());
 
-                String matchedColumnName = matchExistingColumnForBlockingKey(bkDefinition);
+                String matchedColumnName = matchExistingColumnForKey(bkDefinition);
                 pr.put(BlockingKeysTableLabelProvider.PRECOLUMN, null == matchedColumnName ? StringUtils.EMPTY
                         : matchedColumnName);
 
@@ -592,14 +634,13 @@ public class MatchRuleElementTreeSelectionDialog extends ElementTreeSelectionDia
                     pr.put(MatchRulesTableLabelProvider.MATCH_KEY_NAME,
                             null == matchKey.getName() ? StringUtils.EMPTY : matchKey.getName());
 
-                    String matchedColumnName = matchExistingColumnForMatchRule(matchKey);
+                    String matchedColumnName = matchExistingColumnForKey(matchKey);
                     pr.put(MatchRulesTableLabelProvider.INPUT_COLUMN, null == matchedColumnName ? StringUtils.EMPTY
                             : matchedColumnName);
 
                     if (getLookupColumnNames().size() > 0) {
                         for (String lookupColumnName : getLookupColumnNames()) {
-                            if (lookupColumnName.equalsIgnoreCase(matchKey.getColumn())
-                                    || lookupColumnName.equalsIgnoreCase(matchKey.getName())) {
+                            if (isColumnNameEqualsWithKey(matchKey, lookupColumnName)) {
                                 pr.put("LOOKUP_COLUMN", null == matchKey.getColumn() ? StringUtils.EMPTY : lookupColumnName); //$NON-NLS-1$
                                 break;
                             }
@@ -662,8 +703,8 @@ public class MatchRuleElementTreeSelectionDialog extends ElementTreeSelectionDia
      */
     private AlgorithmDefinition getSurvivorshipFunctionAlgorithm(MatchKeyDefinition matchKey,
             MatchRuleDefinition matchRuleDefinition) {
-        EList<SurvivorshipKeyDefinition> survivorshipKeys = matchRuleDefinition.getSurvivorshipKeys();
-        for (SurvivorshipKeyDefinition survivorshipKeyDefinition : survivorshipKeys) {
+        EList<SurvivorshipKeyDefinition> survivorshipKeys1 = matchRuleDefinition.getSurvivorshipKeys();
+        for (SurvivorshipKeyDefinition survivorshipKeyDefinition : survivorshipKeys1) {
             if (StringUtils.equals(matchKey.getName(), survivorshipKeyDefinition.getName())) {
                 return survivorshipKeyDefinition.getFunction();
             }
@@ -682,25 +723,8 @@ public class MatchRuleElementTreeSelectionDialog extends ElementTreeSelectionDia
         this.inputColumnNames = inputColumnNames;
     }
 
-    /**
-     * Getter for survivorshipKeys.
-     * 
-     * @return the survivorshipKeys
-     */
-    public List<String> getSurvivorshipKeys() {
-        if (this.survivorshipKeys == null) {
-            this.survivorshipKeys = new ArrayList<String>();
-        }
-        return this.survivorshipKeys;
-    }
-
-    /**
-     * Sets the survivorshipKeys.
-     * 
-     * @param survivorshipKeys the survivorshipKeys to set
-     */
-    public void setSurvivorshipKeys(List<String> survivorshipKeys) {
-        this.survivorshipKeys = survivorshipKeys;
+    public void setAnalysisCurrentMatchKeys(List<String> matchKeys) {
+        this.currentAnaMatchKeys = matchKeys;
     }
 
     public List<String> getLookupColumnNames() {

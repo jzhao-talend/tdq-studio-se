@@ -1365,6 +1365,9 @@ public class MatchMasterDetailsPage extends AbstractAnalysisMetadataPage impleme
                     checkResultStatus = matchingKeySection.checkResultStatus();
                 } else {
                     checkResultStatus = matchAndSurvivorKeySection.checkResultStatus();
+                    if (checkResultStatus.isOk()) {
+                        checkResultStatus = this.defaultSurvivorshipDefinitionSection.checkResultStatus();
+                    }
                 }
             }
 

@@ -15,7 +15,6 @@ package org.talend.dataprofiler.core.ui.action.actions;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.emf.common.util.EList;
@@ -31,8 +30,9 @@ import org.talend.dataquality.analysis.Analysis;
 import org.talend.dataquality.analysis.AnalysisResult;
 import org.talend.dataquality.indicators.Indicator;
 import org.talend.dataquality.indicators.columnset.RecordMatchingIndicator;
+import org.talend.dataquality.rules.MatchKeyDefinition;
+import org.talend.dataquality.rules.MatchRule;
 import org.talend.dataquality.rules.MatchRuleDefinition;
-import org.talend.dataquality.rules.SurvivorshipKeyDefinition;
 import org.talend.dq.helper.resourcehelper.DQRuleResourceFileHelper;
 import orgomg.cwm.objectmodel.core.ModelElement;
 
@@ -66,7 +66,7 @@ public class ImportMatchRuleAction extends Action {
         }
         dialog.setInputColumnNames(inputColumnNames);
 
-        List<String> survivorshipKeys = new ArrayList<String>();
+        List<String> matchKeysName = new ArrayList<String>();
         AnalysisResult anaResults = analysis.getResults();
         if (anaResults != null) {
             for (Indicator ind : anaResults.getIndicators()) {
@@ -74,16 +74,21 @@ public class ImportMatchRuleAction extends Action {
                     RecordMatchingIndicator rmInd = (RecordMatchingIndicator) ind;
                     MatchRuleDefinition builtInMatchRuleDefinition = rmInd.getBuiltInMatchRuleDefinition();
                     if (builtInMatchRuleDefinition != null) {
-                        for (SurvivorshipKeyDefinition skDef : builtInMatchRuleDefinition.getSurvivorshipKeys()) {
-                            if (skDef != null && !StringUtils.isEmpty(skDef.getName())) {
-                                survivorshipKeys.add(skDef.getName());
+                        for (MatchRule matchRule : builtInMatchRuleDefinition.getMatchRules()) {
+                            EList<MatchKeyDefinition> matchKeys = matchRule.getMatchKeys();
+                            for (MatchKeyDefinition mkd : matchKeys) {
+                                // only need to add different names of the match keys, for the import to compare if any
+                                // same
+                                if (!matchKeysName.contains(mkd.getName())) {
+                                    matchKeysName.add(mkd.getName());
+                                }
                             }
                         }
                     }
                 }
             }
         }
-        dialog.setSurvivorshipKeys(survivorshipKeys);
+        dialog.setAnalysisCurrentMatchKeys(matchKeysName);
         dialog.create();
 
         // dialog.setExpandedElements(getAllMatchRules());

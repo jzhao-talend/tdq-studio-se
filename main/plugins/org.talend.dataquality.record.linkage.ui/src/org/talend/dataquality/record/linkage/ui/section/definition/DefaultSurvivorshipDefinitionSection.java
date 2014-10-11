@@ -31,10 +31,14 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.talend.dataquality.record.linkage.ui.composite.DefaultSurvivorshipTableComposite;
 import org.talend.dataquality.record.linkage.ui.composite.tableviewer.sorter.KeyDefinitionTableViewerSorter;
+import org.talend.dataquality.record.linkage.ui.composite.utils.MatchRuleAnlaysisUtils;
+import org.talend.dataquality.record.linkage.ui.i18n.internal.DefaultMessagesImpl;
 import org.talend.dataquality.record.linkage.ui.section.AbstractMatchAnaysisTableSection;
 import org.talend.dataquality.record.linkage.utils.MatchAnalysisConstant;
+import org.talend.dataquality.record.linkage.utils.SurvivorShipAlgorithmEnum;
 import org.talend.dataquality.rules.DefaultSurvivorshipDefinition;
 import org.talend.dataquality.rules.MatchRuleDefinition;
+import org.talend.utils.sugars.ReturnCode;
 
 /**
  * created by HHB on 2013-8-23 Detailled comment
@@ -222,5 +226,23 @@ public class DefaultSurvivorshipDefinitionSection extends AbstractMatchAnaysisTa
             functions.add(EcoreUtil.copy(def));
         }
         tableComposite.setInput(functions);
+    }
+
+    @Override
+    public ReturnCode checkResultStatus() {
+        ReturnCode returnCode = new ReturnCode(true);
+        for (DefaultSurvivorshipDefinition dsd : matchRuleDef.getDefaultSurvivorshipDefinitions()) {
+            String algorithmType = dsd.getFunction().getAlgorithmType();
+            if (!MatchRuleAnlaysisUtils.isSurvivorShipFunctionConsistentWithType(algorithmType, dsd.getDataType())) {
+                returnCode.setOk(false);
+                String message = DefaultMessagesImpl.getString(
+                        "DefaultSurvivorshipDefinitionSection.survivorshipFunctionNotMatch", dsd.getDataType(), //$NON-NLS-1$
+                        SurvivorShipAlgorithmEnum.getTypeBySavedValue(algorithmType).getValue());
+                returnCode.setMessage(DefaultMessagesImpl.getString("MatchingKeySection.invalidSurvivorshipFunction", //$NON-NLS-1$
+                        getSectionName(), message));
+                return returnCode;
+            }
+        }
+        return returnCode;
     }
 }

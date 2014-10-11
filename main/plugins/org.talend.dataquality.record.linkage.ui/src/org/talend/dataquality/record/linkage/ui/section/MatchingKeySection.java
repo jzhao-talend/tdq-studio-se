@@ -47,7 +47,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.talend.core.model.metadata.builder.connection.MetadataColumn;
-import org.talend.core.model.metadata.types.JavaTypesManager;
 import org.talend.dataquality.analysis.Analysis;
 import org.talend.dataquality.indicators.columnset.RecordMatchingIndicator;
 import org.talend.dataquality.record.linkage.ui.composite.AbsMatchAnalysisTableComposite;
@@ -863,50 +862,20 @@ public class MatchingKeySection extends AbstractMatchKeyWithChartTableSection {
         EList<SurvivorshipKeyDefinition> survivorshipKeys = mrDef.getSurvivorshipKeys();
         for (SurvivorshipKeyDefinition skDef : survivorshipKeys) {
             if (StringUtils.equals(mkDef.getName(), skDef.getName())) {
-                MetadataColumn metadataColumn = getMetadataColumnByName(skDef.getColumn());
+                MetadataColumn metadataColumn = getMetadataColumnByName(mkDef.getColumn());
                 if (metadataColumn != null) {
-                    SurvivorShipAlgorithmEnum survivorShipAlgorithm = SurvivorShipAlgorithmEnum.getTypeBySavedValue(skDef
-                            .getFunction().getAlgorithmType());
-                    switch (survivorShipAlgorithm) {
-                    case LARGEST:
-                    case SMALLEST:
-                        if (!JavaTypesManager.isNumber(metadataColumn.getTalendType())) {
-                            return getFalseMessageWhenNotMatch(metadataColumn.getName(), survivorShipAlgorithm.getValue());
-                        }
-                        break;
-                    case LONGEST:
-                    case SHORTEST:
-                        if (!JavaTypesManager.isString(metadataColumn.getTalendType())) {
-                            return getFalseMessageWhenNotMatch(metadataColumn.getName(), survivorShipAlgorithm.getValue());
-                        }
-                        break;
-                    case PREFER_TRUE:
-                    case PREFER_FALSE:
-                        if (!JavaTypesManager.isBoolean(metadataColumn.getTalendType())) {
-                            return getFalseMessageWhenNotMatch(metadataColumn.getName(), survivorShipAlgorithm.getValue());
-                        }
-                        break;
-                    default:
-                        break;
+                    String algorithmType = skDef.getFunction().getAlgorithmType();
+                    if (!MatchRuleAnlaysisUtils.isSurvivorShipFunctionConsistentWithType(algorithmType,
+                            metadataColumn.getTalendType())) {
+                        rc.setOk(false);
+                        rc.setMessage(DefaultMessagesImpl.getString(
+                                "MatchingKeySection.survivorshipFunctionNotMatch", metadataColumn.getName(), //$NON-NLS-1$
+                                SurvivorShipAlgorithmEnum.getTypeBySavedValue(algorithmType).getValue()));
+                        return rc;
                     }
                 }
-                break;
             }
         }
-        return rc;
-    }
-
-    /**
-     * get the return code with False and Messages When the survivorship functin Not Match.
-     * 
-     * @param rc
-     * @param string
-     * @param string2
-     * @return
-     */
-    private ReturnCode getFalseMessageWhenNotMatch(String columnName, String functionName) {
-        ReturnCode rc = new ReturnCode(false);
-        rc.setMessage(DefaultMessagesImpl.getString("MatchingKeySection.survivorshipFunctionNotMatch", columnName, functionName)); //$NON-NLS-1$ 
         return rc;
     }
 
